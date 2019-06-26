@@ -7,7 +7,7 @@ pipeline {
     stage('Download Artifact') {
       steps {
         bat label: '', script: "curl %buildArtifact% --output sandbox-${BUILD_VERSION}.war"
-        archiveArtifacts(artifacts: "got.war", fingerprint: true)
+        archiveArtifacts(artifacts: "sandbox-${BUILD_VERSION}.war", fingerprint: true)
       }
     }
     stage('Deploy To QA Tomcat') {
