@@ -6,13 +6,13 @@ pipeline {
   stages {
     stage('Download Artifact') {
       steps {
-        bat label: '', script: "curl %buildArtifact% --output got.war"
+        bat label: '', script: "curl %buildArtifact% --output sandbox-${BUILD_VERSION}.war"
         archiveArtifacts(artifacts: "got.war", fingerprint: true)
       }
     }
     stage('Deploy To QA Tomcat') {
       steps {
-        build job: 'GOT-Deploy-to-Test'
+        build job: 'GOT-Deploy-to-Test', parameters: [string(name: 'BUILD_VERSION', value: "${BUILD_VERSION}")]
       }
     }   
   }
