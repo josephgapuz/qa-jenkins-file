@@ -1,6 +1,6 @@
 pipeline {
   environment {
-     buildArtifact = "http://localhost:9090/repository/snapshots/com/sample/sandbox/1.0-SNAPSHOT/sandbox-1.0-20190606.202852-1.war"
+     buildArtifact = "http://localhost:9090/repository/repo/com/sample/sandbox/${BUILD_VERSION}/sandbox-${BUILD_VERSION}.war"
    }
   agent any
   stages {
