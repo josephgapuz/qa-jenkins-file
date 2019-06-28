@@ -18,7 +18,7 @@ pipeline {
         bat label: '', script: 'sonar-scanner'
       }
     }
-    stage('Deploy Artifact to Archiva') {
+    stage('Deploy Release Artifact to Archiva') {
       steps {
         bat label: '', script: 'mvn release:prepare release:perform'
         archiveArtifacts(artifacts: 'target/*.war', fingerprint: true)
