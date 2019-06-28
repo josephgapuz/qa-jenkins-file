@@ -1,19 +1,45 @@
 pipeline {
-  environment {
-     buildArtifact = "http://localhost:9090/repository/internal/com/sample/sandbox/${BUILD_VERSION}/sandbox-${BUILD_VERSION}.war"
-   }
   agent any
+  
   stages {
-    stage('Download Artifact') {
+    stage('Checkout Project') {
       steps {
-        bat label: '', script: "curl %buildArtifact% --output sandbox-${BUILD_VERSION}.war"
-        archiveArtifacts(artifacts: "sandbox-${BUILD_VERSION}.war", fingerprint: true)
+        git credentialsId: 'GitHub', url: 'https://github.com/josephgapuz/sandbox.git'
       }
     }
-    stage('Deploy To QA Tomcat') {
+    stage('Build-Test') {
       steps {
-        build job: 'GOT-Deploy-to-Test', parameters: [string(name: 'BUILD_VERSION', value: "${BUILD_VERSION}")]
+        bat label: '', script: 'mvn clean install'   
+        junit allowEmptyResults: true, testResults: '**target/surefire-reports/*.xml'
       }
-    }   
+    }    
+    stage('Run SonarQube') {
+      steps {
+        bat label: '', script: 'sonar-scanner'
+      }
+    }
+    stage('Deploy Artifact to Archiva') {
+      steps {
+        bat label: '', script: 'release:prepare release:perform'
+        archiveArtifacts(artifacts: 'target/*.war', fingerprint: true)
+      }
+    } 
+    stage('Deploy To Tomcat') {
+      steps {
+        build job: 'GOT-Deploy-to-Test'
+      }
+    }
   }
+  
+  post {
+        always {
+            echo 'Sending email notification!'
+            
+            emailext body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                subject: "Jenkins Build ${currentBuild.currentResult}: Job ${env.JOB_NAME}"
+            
+        }
+    }
+  
 }
