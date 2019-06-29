@@ -60,7 +60,8 @@ pipeline
     
   }
   
-  post {
+  post 
+  {
         always 
         {
             echo 'Sending email notification!'
@@ -78,6 +79,6 @@ pipeline
                 message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} More info at: ${env.BUILD_URL}"
             
         }
-    }
+  }
   
 }
